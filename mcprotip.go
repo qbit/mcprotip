@@ -27,6 +27,7 @@ body {
 }
 
 i {
+  cursor: pointer;
   padding: 3px;
 }
 </style>
