@@ -127,6 +127,11 @@ func (a tips) Less(i, j int) bool { return a[i].Votes > a[j].Votes }
 
 var templ = template.Must(template.New("mcprotip").Parse(mcTemplate))
 
+func sendErr(w http.ResponseWriter, err error) {
+	log.Printf("Received error: %v", err)
+	http.Error(w, err.Error(), 400)
+}
+
 func getTips() (tips, error) {
 	var proTips = tips{}
 
@@ -202,7 +207,8 @@ func vote(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &v); err != nil {
-		log.Fatalf("no tip for you! %v", err)
+		sendErr(w, err)
+		return
 	}
 
 	log.Printf("%d, %v", v.ID, v.Vote)
@@ -220,7 +226,8 @@ func showTips(w http.ResponseWriter, req *http.Request) {
 	log.Print("showing tips")
 	ts, err := getTips()
 	if err != nil {
-		log.Fatalf("Can't get tips!")
+		sendErr(w, err)
+		return
 	}
 
 	templ.Execute(w, ts)
@@ -236,7 +243,8 @@ func showJSONTips(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(ts); err != nil {
-		log.Fatalf("can't encode tips!")
+		sendErr(w, err)
+		return
 	}
 }
 
