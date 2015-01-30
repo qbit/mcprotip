@@ -141,6 +141,8 @@ func getTips() (tips, error) {
 		log.Fatal("Can't list the list!")
 	}
 
+	defer client.Close()
+
 	for key := range proList {
 		var t = tip{}
 		t.ID = key
@@ -162,6 +164,9 @@ func setVote(id int, state bool) int {
 	}
 
 	client, err := redis.Dial("tcp", "localhost:6379")
+
+	defer client.Close()
+
 	if err != nil {
 		log.Fatal("Can't connect to redis!")
 	}
@@ -240,7 +245,7 @@ func main() {
 
 	r.HandleFunc("/vote", vote).Methods("POST")
 	r.HandleFunc("/", showTips)
-	r.HandleFunc("/json", showJsonTips)
+	r.HandleFunc("/json", showJSONTips)
 
 	http.Handle("/", r)
 	http.ListenAndServe(":3016", nil)
