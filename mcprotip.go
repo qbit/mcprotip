@@ -132,7 +132,7 @@ func getTips() (tips, error) {
 
 	client, err := redis.Dial("tcp", "localhost:6379")
 	if err != nil {
-		log.Fatal("Can't connect to redis!")
+		log.Fatalf("Can't connect to redis! %v", err)
 	}
 
 	list := client.Cmd("smembers", "protip")
@@ -168,7 +168,7 @@ func setVote(id int, state bool) int {
 	defer client.Close()
 
 	if err != nil {
-		log.Fatal("Can't connect to redis!")
+		log.Fatalf("Can't connect to redis! %v", err)
 	}
 
 	r := client.Cmd("HINCRBY", "protip_votes", id, val)
