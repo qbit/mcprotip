@@ -161,7 +161,7 @@ func getTips() (tips, error) {
 	return proTips, err
 }
 
-func setVote(id int, state bool) int {
+func setVote(id int, state bool) (*int, error) {
 	val := 0
 	if state {
 		val = 1
@@ -174,15 +174,17 @@ func setVote(id int, state bool) int {
 	defer client.Close()
 
 	if err != nil {
-		log.Fatalf("Can't connect to redis! %v", err)
+		log.Printf("Can't connect to redis! %v", err)
+		return nil, err
 	}
 
 	r := client.Cmd("HINCRBY", "protip_votes", id, val)
 	if r.Err != nil {
-		log.Fatalf("%v", r.Err)
+		log.Printf("Can't incrby: %v", r.Err)
+		return nil, r.Err
 	}
 
-	return val
+	return &val, nil
 }
 
 func getVotes(id int, client *redis.Client) int {
@@ -201,10 +203,14 @@ func vote(w http.ResponseWriter, req *http.Request) {
 
 	body, err := ioutil.ReadAll(io.LimitReader(req.Body, 1048576))
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Printf("Can't read body: %v", err)
+		sendErr(w, err)
+		return
 	}
 	if err := req.Body.Close(); err != nil {
-		log.Fatalf("err %v", err)
+		log.Printf("Can't close body: %v", err)
+		sendErr(w, err)
+		return
 	}
 
 	if err := json.Unmarshal(body, &v); err != nil {
@@ -214,11 +220,16 @@ func vote(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%d, %v", v.ID, v.Vote)
 
-	_ = setVote(v.ID, v.Vote)
-
+	_, err = setVote(v.ID, v.Vote)
+	if err != nil {
+		sendErr(w, err)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Fatal("can't encode vote!")
+		log.Printf("can't encode vote!: %v", err)
+		sendErr(w, err)
+		return
 	}
 
 }
