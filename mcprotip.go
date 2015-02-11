@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/fzzy/radix/redis"
-	"github.com/gorilla/mux"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
+
+	"github.com/fzzy/radix/redis"
+	"github.com/gorilla/mux"
 )
 
 const mcTemplate = `
