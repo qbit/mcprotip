@@ -142,7 +142,7 @@ func getTips() (tips, error) {
 		log.Fatalf("Can't connect to redis! %v", err)
 	}
 
-	list := client.Cmd("smembers", "protip")
+	list := client.Cmd("lrange", "l_protips", 0, -1)
 	proList, err := list.List()
 	if err != nil {
 		log.Fatal("Can't list the list!")
