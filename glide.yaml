@@ -1,0 +1,6 @@
+package: .
+import:
+- package: github.com/fzzy/radix
+  subpackages:
+  - redis
+- package: github.com/gorilla/mux
