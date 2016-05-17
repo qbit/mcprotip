@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -267,6 +268,9 @@ func main() {
 	r.HandleFunc("/vote", vote).Methods("POST")
 	r.HandleFunc("/", showTips)
 	r.HandleFunc("/json", showJSONTips)
+	r.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "OK")
+	})
 
 	http.Handle("/", r)
 	http.ListenAndServe(":3016", nil)
